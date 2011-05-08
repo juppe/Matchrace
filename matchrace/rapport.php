@@ -1,6 +1,6 @@
 <?php
 
-if($tee == "Y") {
+if ($tee == "Y") {
 	$filename="testi.csv"; 
 	//header("Content-type: application/force-download");
 	//header("Content-Disposition: attachment; filename=".$filename);
@@ -20,10 +20,10 @@ if($tee == "Y") {
 				FROM varaukset
 				WHERE id >= 0 ";
 	
-	if(strlen($ehto) > 0) {
+	if (strlen($ehto) > 0) {
 		$query .= "and ".str_replace("\\\"", "'", $ehto);
 	}
-	if(strlen($lisa) > 0) {
+	if (strlen($lisa) > 0) {
 		$query .= " ".str_replace("\\\"", "'", $lisa);
 	}
 	$result = mysql_query($query)
@@ -34,7 +34,7 @@ if($tee == "Y") {
 		echo "\"".mysql_field_name($result,$i)."\"\t";
 	}
 	echo "\n";
-	while ($row = mysql_fetch_array($result)){
+	while ($row = mysql_fetch_array($result)) {
 		for($i=0; $i<mysql_num_fields($result);$i++) {			
 			echo "\"".str_replace("\r\n", "<br>", $row[$i])."\"\t";
 		}
@@ -47,7 +47,7 @@ if ($tee == '') {
 	echo "<h1>Aja raportti<hr></h1>";
 	echo "
 		<table><tr>
-		<form action = '$PHP_SELF?session=$session&tee=Y' name='kala' method='post'>
+		<form action = '$PHP_SELF?tee=Y' name='kala' method='post'>
 		<td>SELECT:&nbsp;</td>
 		<td><input type='text' name='kentat' size='80'></td>
 		<td></tr>

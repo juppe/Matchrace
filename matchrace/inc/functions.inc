@@ -101,7 +101,7 @@
 
 	function month_name($month) {
 		// display long month name
-		$kk = $MONTH_ARRAY;
+		$kk = $MONTH_ARRAY[$kukarow["aktiivinen_kalenteri"]];
 		return $kk[$month-1];
 	}
 

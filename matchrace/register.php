@@ -1,86 +1,123 @@
 <?php
-	
+
 	// Parametrit
 	require('inc/parametrit.inc');
 
-	$xpvm = explode("-",$paivam);                	
-	
-	echo "<table class='main' align='center'>";
-	echo "<tr><td class='back' valign='bottom' nowrap><img src='logo2.gif'></td><td class='back' nowrap><h1>MRC - Varauskalenteri: ". $MONTH_ARRAY[$month] ." $year</h1></td></tr>";
-	echo "<tr><td class='back'><a href='main.php?day=1&month=$xpvm[1]&year=$xpvm[0]'>Takaisin kalenteriin</a></td></tr>";
-	echo "<tr><td class='back'><br></td></tr>";
-	echo "<tr><td class='back' colspan='2'>";
-	
-	if($tee == ''){
-        echo "<b>Luo uusi käyttäjä:</b></font>";
-        echo "<form action='$PHP_SELF?session=$session' method='post'>";
-		echo "<input type='hidden' name='tee' value='UU'>";
-        echo "<table style='border:solid 1px #757B81;' cellspacing='1' cellpadding='4' width='500'>";
-
-        echo "<tr><th align='left'>Käyttäjätunnus:</th><td><input type='text' size='35' name='usercode' maxlength='10'>$tdfont (required)</font></td></tr>";
-        echo "<tr><th align='left'>Salasana:</th><td><input type='password' size='35' maxlength='10' name='passwd1'>$tdfont (required)</font></td></tr>";
-        echo "<tr><th align='left'>Salasana (uudestaan):</th><td><input type='password' size='35' maxlengt='10' name='passwd2'>$tdfont (required)</font></td></tr>";
-        echo "<tr><th align='left'>Nimi:</th><td><input type='text' size='35' maxlength='35' name='firname'>$tdfont (required)</font></td></tr>";
-        echo "<tr><th align='left'>Alias:</th><td><input type='text' size='35' maxlength='3' name='pinnamies'>$tdfont (required)</font></td></tr>";
-		echo "<tr><th align='left'>Puhelin:</td><td><input type='text' size='35' maxlength='35' name='phonenum'></td></tr>";
-        echo "<tr><th align='left'>E-Mail:</th><td><input type='text' size='35' maxlength='35' name='email'></td></tr>";
-        echo "<tr><th></th><th><input type='submit' value='Submit'></th></tr>";
-        echo "</table></form>";
-	}
-
-	if($tee == 'UU'){
-		$passwd1 = trim($passwd1);
-		$passwd2 = trim($passwd2);
+	if ($tee == 'LISAAKAYTTAJA') {
+		$passwd1  = trim($passwd1);
+		$passwd2  = trim($passwd2);
 		$usercode = trim($usercode);
 
-		if(strlen($passwd1) >= 5) {
-        	$query = "SELECT kuka
-        	          FROM kuka
-        	          WHERE kuka='$usercode'";
-        	$result = mysql_query ($query)
-        		or die ("Query failed");
-			if (mysql_num_rows($result) == 0) {
-				if($passwd1 == $passwd2) {
-	    			if($usercode != '' && $passwd1 != '' && $pinnamies != '' && $pinnamies != ''){
-	        	    	$query = "INSERT into kuka SET
-								kuka = '$usercode',
-		                        salasana = '$passwd1',
-		                        pinnamies = '$pinnamies',
-								nimi = '$firname',
-		                       	puhno = '$phonenum',
-								access = '10',
-		                        eposti = '$email'";
+        $virhe = "";
+		$kaleinsert = "";
 
-	                	$result = mysql_query ($query)
-	                        or die ("Insert failed");
-	             		echo "<br><br><br>$thfont Your account has successfully been created!";
-						echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=main.php?session=$session'>";
-	          		}
-	            	else {
-	               		echo "<br><br>You did not enter all the required information!
-	               		<br>Please click the Back button and fill in all the required information.";
-	           		}
-	       		}
-				else {
-	       			echo "<br><br>Your passwords does not match!
-	        	   	<br>Please click the Back button and retype your passwords.";
-	       		}
-			}
-			else {
-	    	  	echo "<br><br>Your usercode is reserved!
-	    	    <br>Please click the Back button and fill in a new usercode.";
-	    	}
+		if ($usercode == "") {
+			$virhe .= "VIRHE: Käyttäjätunnus puuttuu!<br>";
+			$tee = "";
 		}
 		else {
-    	    echo "<br><br>Your password is too short!
-    	    <br><br>Please click the Back button and fill in a password that is at least 5 characters long.";
+			$query = "SELECT kuka
+	       	          FROM kuka
+	       	          WHERE kuka = '$usercode'";
+	       	$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+			if (mysql_num_rows($result) > 0) {
+				$virhe .= "VIRHE: Käyttäjätunnus '$usercode' on jo käytössä!<br>";
+				$tee = "";
+			}
 		}
-		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<form><input type='button' value='Back' onClick='history.go(-1)'></form>";
+		
+		if ($pinnamies == "") {
+			$virhe .= "VIRHE: Alias puuttuu!<br>";
+			$tee = "";
+		}
+		else {
+			$query = "SELECT kuka
+	       	          FROM kuka
+	       	          WHERE pinnamies = '$pinnamies'";
+	       	$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+			if (mysql_num_rows($result) > 0) {
+				$virhe .= "VIRHE: Alias '$pinnamies' on jo käytössä!<br>";
+				$tee = "";
+			}
+		}
+
+		if ($passwd1 != $passwd2) {
+			$virhe .= "VIRHE: Salasanat eivät täsmää!<br>";
+			$tee = "";
+		}
+
+		if ($usercode == '' or $passwd1 == '' or $passwd2 == '' or $pinnamies == '' or $firname == '') {
+			$virhe .= "VIRHE: Pakollisia tietoja puuttuu!<br>";
+			$tee = "";
+		}
+
+		if (strlen($passwd1) < 5) {
+    	    $virhe .= "VIRHE: Salasana on liian lyhyt! Minimipituus on 5 merkkiä.<br>";
+			$tee = "";
+		}
+
+		if (!isset($kalenterit) or count($kalenterit) == 0) {
+			$virhe .= "VIRHE: Valitse kalenterit käyttäjälle!<br>";
+			$tee = "";
+		}
+		else {
+			$kaleinsert = implode(",", $kalenterit);
+		}
+
+    	if ($tee == 'LISAAKAYTTAJA') {
+           	$query = "	INSERT into kuka SET
+						kalenterit	= '$kaleinsert',
+						kuka 		= '$usercode',
+	                    salasana 	= '$passwd1',
+	                    pinnamies 	= '$pinnamies',
+						nimi 		= '$firname',
+	                    puhno 		= '$phonenum',
+						access 		= '10',
+	                    eposti 		= '$email'";
+			$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+
+			echo "<br><br><br>Käyttäjä '$usercode' luotiin onnistunesti!";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=main.php'>";
+		}
+		else {
+			echo "<br>$virhe";
+		}
+
+		$tee = "";
+	}
+
+
+	if ($tee == '') {
+		
+		echo "<h2>Luo uusi käyttäjä:</h2>";
+		
+		echo "<form method='post'>";
+		echo "<input type='hidden' name='tee' value='LISAAKAYTTAJA'>";
+		
+        echo "<table class='main'>";
+		echo "<tr><th align='left'>Käyttäjätunnus:</th><td><input type='text' size='35' name='usercode' maxlength='10' value='$usercode'></td><td>(pakollinen tieto)</td></td></tr>";
+		echo "<tr><th align='left'>Nimi:</th><td><input type='text' size='35' maxlength='35' name='firname' value='$firname'></td><td>(pakollinen tieto)</td></td></tr>";
+		echo "<tr><th align='left'>Kalenterit:</th><td>";
+
+		foreach ($KALENTERIT_ARRAY as $kindex => $knimi) {
+			$chk = "";
+			if (isset($kalenterit[$kindex]) and $kalenterit[$kindex] > 0) $chk = "CHECKED";
+
+			echo "<input type='checkbox' name='kalenterit[$kindex]' value='$kindex' $chk> - $knimi<br>";
+		}
+
+		echo "</td><td>(pakollinen tieto)</td></tr>";          
+        echo "<tr><th align='left'>Alias:</th><td><input type='text' size='35' maxlength='3' name='pinnamies' value='$pinnamies'></td><td>(pakollinen tieto)</td></td></tr>";
+		echo "<tr><th align='left'>Puhelin:</td><td><input type='text' size='35' maxlength='35' name='phonenum' value='$phonenum'></td><td></td></tr>";
+        echo "<tr><th align='left'>Sähköposti:</th><td><input type='text' size='35' maxlength='35' name='email' value='$email'></td><td></td></tr>";
+		echo "<tr><th align='left'>Salasana:</th><td><input type='password' size='35' maxlength='10' name='passwd1' value='$passwd1'></td><td>(pakollinen tieto)</td></td></tr>";
+        echo "<tr><th align='left'>Salasana (uudestaan):</th><td><input type='password' size='35' maxlengt='10' name='passwd2' value='$passwd2'></td><td>(pakollinen tieto)</td></td></tr>";
+        echo "</table>";
+		echo "<br><input type='submit' value='Lisää käyttäjä'>";
+		echo "</form>";
 	}
 	
-	echo "</td></tr>";
-	echo "<tr><td class='back'><br></td></tr>";
-	echo "<tr><td class='back'><a href='main.php?day=1&month=$xpvm[1]&year=$xpvm[0]'>Takaisin kalenteriin</a></td></tr>";
-	echo "</table>";
-	echo "</body></html>";
+	require('inc/footer.inc');	
 ?>

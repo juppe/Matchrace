@@ -5,14 +5,12 @@ $serc = array("\"","'","<",">","\\", ";");
 $repl = array("", "", "", "", "", "");
 
 foreach ($_GET as $key => $value) {
-	//$_GET[$key] = addslashes(trim($_GET[$key]));
 	$_GET[$key] = str_replace($serc, $repl, $_GET[$key]);
 	${$key} = str_replace($serc, $repl, $_GET[$key]);
 }
 
 // poistetaan hipsuja ja trimmataan kaikki post muuttujat!
 foreach ($_POST as $key => $value) {
-	//$_POST[$key] = addslashes(trim($_POST[$key]));
 	$_POST[$key] = str_replace($serc, $repl, $_POST[$key]);
 	${$key} = str_replace($serc, $repl, $_POST[$key]);
 }
@@ -28,6 +26,7 @@ mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta lˆydy palvelimelta!");
 
 // jos k‰ytet‰‰n jotain kummallista porttia (ei http eik‰ https)
 $portti = "";
+
 if ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') {
 	$portti = ":".$_SERVER['SERVER_PORT'];
 }
@@ -39,8 +38,8 @@ $apunimi = str_replace($alut, "", $palvelin);
 $tark    = $_SERVER['SERVER_NAME'].$portti.$_SERVER['SCRIPT_NAME'];
 $phpnimi = str_replace($apunimi, "", $tark);
 
-if (isset($_COOKIE["pupesoft_session"])) {
-	$session = $_COOKIE["pupesoft_session"];
+if (isset($_COOKIE["matchrace_session"])) {
+	$session = $_COOKIE["matchrace_session"];
 }
 else {
 	$session = "";
@@ -66,77 +65,24 @@ else {
 	$browkieli = 'en';
 }
 
-//Initioidaan pari muuttujaa
-if(!isset($login))		$login = "";
+// Initioidaan pari muuttujaa
+if (!isset($login)) $login = "";
 
-
-// jos saamme n‰m‰ muuttujat getiss‰, kokeillaan logata niill‰ sis‰‰n
-if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
-
-	$query = "select * from kuka where yhtio='$_GET[yhtio]' and kuka='$_GET[user]' and salasana=md5('$_GET[pass]')";
-	$result = mysql_query($query) or die ("Sis‰‰nkirjaus ep‰onnistui!");
-
-	if (mysql_num_rows($result) == 1) {
-
-		$apukukarow = mysql_fetch_array($result);
-
-		// jos meill‰ on sessio niin poistetaan se tietokannasta jo aluks
-		if ($session != "") {
-			$query = "	UPDATE kuka
-						SET session = ''
-						WHERE session = '$session'";
-			$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui sis‰‰nkirjautumisessa");
-		}
-
-		$session = "";
-		for ($i = 0; $i < 25; $i++) {
-			$session .= chr(rand(65,90)) ;
-		}
-
-		$query = "	UPDATE kuka
-					SET session = '$session',
-					lastlogin = now()
-					WHERE kuka = '$apukukarow[kuka]'
-			 		and yhtio = '$apukukarow[yhtio]'";
-		$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui sis‰‰nkirjautumisessa");
-
-		$query = "	UPDATE kuka
-					SET session = ''
-					WHERE kuka = '$apukukarow[kuka]'
-			 		and yhtio != '$apukukarow[yhtio]'";
-		$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui sis‰‰nkirjautumisessa");
-
-		$bool = setcookie("pupesoft_session", $session, time()+43200); // 12 tuntia voimassa
-
-		if ($bool === FALSE) {
-			die ("Sis‰‰nkirjaus ep‰onnistui!");
-		}
-	}
-	else {
-		die ("Sis‰‰nkirjaus ep‰onnistui!");
-	}
-
-}
-// jos sessionia ei ole ja ei olla loginissa, menn‰‰n login ruutuun ja exit...
-elseif ($session == '' and $login != 'yes') {
+if ($session == '' and $login != 'yes') {
 	require("index.php");
 	exit;
 }
 
 // jos meill‰ on sessio
 if ($session != '') {
-
 	$query = "	SELECT *
 				FROM kuka
-				WHERE session='$session'";
+				WHERE session = '$session'";
 	$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
 
 	if (mysql_num_rows($result) != 1 or strlen($session) != 25) {
-		if (isset($nayta_pdf) and $nayta_pdf == 1) {
-			echo "Your browser does not seem to support cookies.";
-			exit;
-		}
-		$bool = setcookie("pupesoft_session", "", time()-432000);
+
+		$bool = setcookie("matchrace_session", "", time()-432000);
 
 		if ($bool === FALSE) {
 			echo "Your browser does not seem to support cookies.";
@@ -146,215 +92,33 @@ if ($session != '') {
 		}
 		exit;
 	}
-	$kukarow = mysql_fetch_array($result);
+
+	$kukarow = mysql_fetch_assoc($result);
+
+	$kalet = explode(",", $kukarow["kalenterit"]);
+	$KUKA_KALENTERIT = array();
+
+	for ($k = 0; $k < count($kalet); $k++) {
+		$KUKA_KALENTERIT[$kalet[$k]] = $kalet[$k];
+	}
+	
+	if (isset($kalenteri_select)) {
+		if (isset($KUKA_KALENTERIT[$kalenteri_select])) {
+			$query = "	UPDATE kuka
+						SET aktiivinen_kalenteri = '$kalenteri_select'
+						WHERE kuka = '{$kukarow["kuka"]}'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");	
+			
+			$kukarow["aktiivinen_kalenteri"] = $kalenteri_select;
+		}
+	}
 
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave k‰yttˆˆn jos sellaista tarvitaan
 	require("connect.inc");
 
 	if ($phpnimi != 'index.php') {
 
-		$charset = "iso-8859-1";
-
-		if ($kukarow["kieli"] == "ru" or $kukarow["kieli"] == "ee") {
-			$charset = "utf-8";
-		}
-
-		header("Content-Type: text/html; charset=$charset");
-
-		echo "<html>";
-		echo "<head>";
-		echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";
-		echo "<META Http-Equiv='Pragma' Content='no-cache'>";
-		echo "<META Http-Equiv='Expires' Content='0'>";
-		echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
-		echo "<STYLE TYPE='text/css'>
-			<!--
-		    
-			* {
-				font-size: 10pt;
-				font-weight:normal;
-				font-family: sans-serif; 
-				color: #555;  
-			}
-			body {
-				background-color: #ffffff;
-			}
-			form {
-				margin: 0px;
-				padding: 0px;
-				background-color: inherit;
-			}
-			table {
-				border-spacing: 1px 1px;
-				display: table;
-				empty-cells: show;
-				background-color: inherit;
-			}
-			table.main {
-				border-spacing: 1px 1px;
-				border: 1px #88adeb solid;
-				padding: 4px;
-				display: table;
-				width: 700px;
-				empty-cells: show;
-				background-color: inherit;
-			}
-			a {
-				color: #333;
-				background-color: inherit; 
-			}
-			a.td {
-				color: #333;
-				font-size: 8pt;
-				text-align: center;
-				text-decoration: none;
-				background-color: inherit;
-				display: block; 
-			}
-			a.menu {
-				color: #333;
-				text-decoration: none;
-				white-space: nowrap;
-				font-stretch: condensed;
-				display: block;
-				width: 100%;
-				background-color: inherit;
-			}
-			a:hover {
-				border-bottom: 1px solid #ff0000;
-			}
-			a.td:hover {
-				background-color: #00FF00;
-				border-bottom: 0px;
-			}
-			a.menu:hover {
-				background-color: #eee;
-				border-bottom: 0px;
-			}
-			a.puhdas:hover {
-				border-bottom: 0px;
-			}
-			th {
-				color: #333; 
-				background-color: #88adeb; 
-			}
-			th a {
-				color: #333;
-			}
-			td {
-				color: #333;
-				font-size: 8pt;
-				background-color: #eee;
-			}
-			td.tumma {
-				color: #333; 
-				background-color: #88adeb; 
-			}
-			td.day {
-				color: #333; 
-				padding: 4px;
-				text-align:center;
-				vertical-align: top;
-				border: 1px solid #005A9B;
-				background-color: #88adeb; 
-			}
-			td.green {
-				color: #333;
-				text-align: center;
-				width: 35px; 
-				height: 20px;
-				background-color: #afa;
-
-			}
-			td.red {
-				color: red; 
-				background-color: #faa;
-			}
-			td.spec {
-				color: #FF0000; 
-				background-color: #eee;
-			}
-			td.back {
-				color: #333;
-				background-color: #ffffff; 
-			}
-			input, textarea, select {
-				margin: 0x;
-				padding: 2px;
-				background-color: #FFFFFF; 
-				border: 1px #88adeb solid; 
-			}
-			hr {
-				border: 0px;
-				height: 1px;
-				background-color: #88adeb;
-				width: 100%; 
-			}
-			h1 {
-				color: #005A9B; 
-				text-transform: uppercase;
-				font-weight:bold;
-				letter-spacing: 3px;
-				background-color: inherit;
-				display: inline;
-			}
-			font.info {
-				font-size:8pt;  
-				color: #005A9B;
-				font-weight: normal;
-				background-color: inherit;
-			}   
-			font.head {
-				color: #005A9B; 
-				text-transform: uppercase;
-				font-weight:bold;
-				letter-spacing: 3px;
-				background-color: inherit;
-			}
-			font.menu {
-				font-size:9pt;  
-				color: #005A9B;
-				background-color: inherit;
-			}
-			font.error {
-				font-size:9pt;  
-				color: red; 
-				font-weight:bold;
-				background-color: inherit;
-			}   
-			font.message {
-				font-size:9pt;  
-				color: green; 
-				font-weight:bold;
-				background-color: inherit;
-			}					
-			-->
-			</STYLE>";
-		echo "<title>Varauskalenteri</title>";
-		echo "</head>";
-		echo "<body>";
-	
-		$AIKA_ARRAY = array("10-17","17-22");
-		$VENE_ARRAY = array("7","6","5","4","3","2","1");
-
-		//Kuinka kauas tulevaiuuteen voidaan varata (p‰ivi‰)
-		$max_aika_tulevaisuuteen = 1000;
-
-		//Kuinka monta varausta k‰ytt‰j‰ll‰ voi olla per viikko
-		$max_varaukset_per_viikko = 4;
-
-		//Kuinka monta varausta k‰ytt‰j‰ll‰ voi olla kaiken kaikkiaan auki
-		$max_tulevat_varaukset = 4;
-		
-		//Kuinka monta p‰iv‰‰ ennen varausta on viimeinen perumisp‰iv‰
-		$max_perumispaiva = 1;
-		
-		//Viimeinen perumisaika perumisp‰iv‰n‰
-		$max_perumisaika = 1200;
-
-		//kuukaudet ja p‰iv‰t ja ajat
-		$MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kes‰kuu','Hein‰kuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
-		$DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai", "Lauantai","Sunnuntai");
+		header("Content-Type: text/html; charset=iso-8859-1");
 		
 		// otetaan oletukseksi t‰m‰ kuukausi ja t‰m‰ vuosi
 		if ($month == '') 	$month = date("n");
@@ -378,23 +142,119 @@ if ($session != '') {
 		$nextmmonth = date("n",mktime(0, 0, 0, $month+1, $day,  $year));
 		$nextymonth = date("Y",mktime(0, 0, 0, $month+1, $day,  $year));
 		$nextdmonth = date("j",mktime(0, 0, 0, $month+1, $day,  $year));
+
+		echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
+				<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"sv-se\" lang=\"sv-se\" dir=\"ltr\" >
+				<head>
+					<base href=\"$palvelin2\" />
+					<meta http-equiv=\"content-type\" content=\"text/html; charset=iso-8859-1\" />
+					<meta name=\"robots\" content=\"index, follow\" />
+					<meta name=\"keywords\" content=\"\" />
+					<meta name=\"description\" content=\"\" />
+
+					<META Http-Equiv=\"Cache-Control\" Content=\"no-cache\">
+					<META Http-Equiv=\"Pragma\" Content=\"no-cache\">
+					<META Http-Equiv=\"Expires\" Content=\"0\">
+
+					<title>MatchRace / 606 / SM40 - Varauskalenterit</title>
+					<link href=\"images/favicon.ico\" rel=\"shortcut icon\" type=\"image/x-icon\" />
+					<link rel=\"shortcut icon\" href=\"images/favicon.ico\" />
+					<link href=\"css/template_css.css\" rel=\"stylesheet\" type=\"text/css\" />
+				</head>
+				<body>
+				<div id=\"page_margins\">
+		 			<div id=\"page\">
+		  				<div id=\"topmenu\">
+					 		<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">
+		 					<tr>
+		 						<td>
+		 						<div id=\"topnav_corner_left\">&nbsp;</div>
+		 						</td>
+								<td>
+								<div id=\"topmenu_container\">
+		    					<ul class=\"menu\" id=\"mainmenu\">
+								<li class=\"item1\"><a href=\"{$palvelin2}main.php\"><span>Kalenteri</span></a></li>";
+
+		if ($kukarow["superuser"] == 'SUPER' and $kukarow["access"] < 20) {
+			echo "<li class=\"item2\"><a href='register.php?paivam=$year-$month-1'><span>Uusi k‰ytt‰j‰</span></a></li>";
+		}
+
+		if ($kukarow["access"] < 20) {
+			echo "	<li class=\"item3\"><a href='updateacc.php?paivam=$year-$month-1'><span>P‰ivit‰ tietosi</span></a></li>
+				   	<li class=\"item4\"><a href='listaa.php?paivam=$year-$month-1'><span>Listaa purjehtijat</span></a></li>
+			   		<li class=\"item5\"><a href='scrap.php?paivam=$year-$month-1'><span>Keskustele</span></a></li>
+					<li class=\"item6\"><a href='listaavaraukset.php?paivam=$year-$month-1'><span>Omat varaukset</span></a></li>";
+		}
+
+		echo "<li class=\"item11\"><a href='logout.php'><span>Kirjaudu ulos</span></a></li>";
+
+		echo "						</ul>
+								</div>
+		    					</td>
+		    					<td>
+		    					<div id=\"topnav_corner_right\">&nbsp;</div>
+		 						</td>
+		 					</tr>
+		 					</table>
+					 	</div>
+						<!-- topmenu end -->
+						<div id=\"header\">
+		    				<div id=\"header_image\">
+								<img src=\"images/matchrace.jpg\" alt=\"matchrace.jpg\" style=\"width: 218px; height: 207px; float: left;\" title=\"matchrace.jpg\" width=\"386\" height=\"207\" />    		</div>
+		    					<div id=\"header_text\">
+		            			<table cellpadding=\"0\" cellspacing=\"0\" class=\"moduletable\">
+								<tr>
+								<td>";
+
+
+		echo "<h3>MatchRace / 606 / SM40 - Varauskalenterit</h3>";
+
+		echo "<form method='post'><h3>Valitse kalenteri:
+				<select name='kalenteri_select' onchange='submit();'>";
+
+		foreach ($KALENTERIT_ARRAY as $kindex => $knimi) {
+			if (isset($KUKA_KALENTERIT[$kindex])) {
+				$chk = "";
+				if ($kukarow["aktiivinen_kalenteri"] == $kindex) $chk = "SELECTED";
+				echo "<option value='$kindex' $chk>$knimi</option>";
+			}
+		}
+
+		echo "	</select>
+				</h3>
+				</form>";
+
+		echo "					</td>
+								</tr>
+								</table>
+			    			</div>
+		    				<a href=\"http://www.njk.fi\"><div id=\"logo\"></div></a>
+						</div>
+
+						<div id=\"content_wrapper\">
+							<table border=\"0\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">
+				   				<tr>
+				  				<td valign=\"top\" id=\"content_left_shadow\">&nbsp;</td>
+				  				<td align=\"center\" valign=\"top\" id=\"content_td\">
+				    				<div id=\"main_content\">";
+				
+		if (isset($paivam)) $xpvm = explode("-",$paivam);
 		
-		
-		require("functions.inc");	
+		require("functions.inc");
 	}
-	
+
 	/*
-	$query = "	select vene, pinnamies, paivam, pass, count(*), min(id) mintunnus, group_concat(id) tunnukset 
-				from varaukset 
-				group by vene, pinnamies, paivam, pass 
+	$query = "	select vene, pinnamies, paivam, pass, count(*), min(id) mintunnus, group_concat(id) tunnukset
+				from varaukset
+				group by vene, pinnamies, paivam, pass
 				having count(*) != 1";
 	$vres = mysql_query($query) or die($query);
-	
+
 	while($vrow = mysql_fetch_array($vres)) {
-		$query = "	DELETE 
-					FROM varaukset 
+		$query = "	DELETE
+					FROM varaukset
 					WHERE id in ($vrow[tunnukset]) and id != '$vrow[mintunnus]'";
-		$res = mysql_query($query) or die($query);	
+		$res = mysql_query($query) or die($query);
 	}
 	*/
 }
