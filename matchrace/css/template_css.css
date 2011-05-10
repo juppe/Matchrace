@@ -821,18 +821,9 @@ ul#mainmenu ul.submenu li a:hover, ul#mainmenu ul li a:hover{
 ul#mainmenu ul.submenu li a:hover span, ul#mainmenu ul li a:hover span{
 	color: #989A66 !important ;
 }
-
-
-
 form {
 	margin: 0px;
 	padding: 0px;
-	background-color: inherit;
-}
-table {
-	border-spacing: 1px 1px;
-	display: table;
-	empty-cells: show;
 	background-color: inherit;
 }
 table .main {
@@ -841,6 +832,12 @@ table .main {
 	padding: 4px;
 	display: table;
 	width: 700px;
+	empty-cells: show;
+	background-color: inherit;
+}
+table .kalenteri {
+	border-spacing: 1px 1px;
+	display: table;
 	empty-cells: show;
 	background-color: inherit;
 }

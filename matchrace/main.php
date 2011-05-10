@@ -4,14 +4,14 @@
 	require('inc/parametrit.inc');
 
 	if ((int) $kukarow["aktiivinen_kalenteri"] == 0) {
-		echo "Valitse käytettävä kalenteri!<br>";
+		echo t("Valitse käytettävä kalenteri")."!<br>";
 	}
 	else {
 		echo "<table class='main' align='center'>";
 		echo "<tr><td class='back' colspan='2'>";
 
 		echo "<form method='post'>";
-		echo "<table width='100%'>";
+		echo "<table class='kalenteri' width='100%'>";
 		echo "<tr>";
 		echo "<th><a class='menu' href='main.php?day=1&month=$backmmonth&year=$backymonth'> << </a></th> ";
 		echo "<th align='center'><select name='month' Onchange='submit();'>";
@@ -25,7 +25,7 @@
 			else {
 				$sel = "";
 			}
-			echo "<option value='$i' $sel>$val</option>";
+			echo "<option value='$i' $sel>".t("$val")."</option>";
 			$i++;
 		}
 
@@ -37,14 +37,14 @@
 		echo "</td></tr>";
 
 		echo "<tr><td class='back' colspan='2'>";
-		echo "<table width='100%'>";
+		echo "<table class='kalenteri' width='100%'>";
 
 		echo "<tr>";
 
 		for ($r=0; $r < count($DAY_ARRAY[$kukarow["aktiivinen_kalenteri"]]); $r++) {
-			echo "	<th nowrap><b>{$DAY_ARRAY[$kukarow["aktiivinen_kalenteri"]][$r]}</b>
+			echo "	<th nowrap><b>".t($DAY_ARRAY[$kukarow["aktiivinen_kalenteri"]][$r])."</b>
 					<br>
-					<table width='100%'>
+					<table class='kalenteri' width='100%'>
 					<tr>";
 
 			for ($s=0; $s < count($AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]]); $s++) {
@@ -74,7 +74,7 @@
 			$tpm = date("Ymd", mktime(0, 0, 0, date("m"), date("d") + $max_aika_tulevaisuuteen[$kukarow["aktiivinen_kalenteri"]], date("Y")));
 
 			if ($kukarow["access"] < 20 and (($tpk >= $tpa and $tpk <= $tpm) or ($kukarow["superuser"] == 'SUPER' and $tpk >= $tpa))) {
-				echo "<td class='day'><b>$i</b> <a href='tapahtuma.php?paivam=$year-$month-$i'>Varaa</a><br>";
+				echo "<td class='day'><b>$i</b> <a href='tapahtuma.php?paivam=$year-$month-$i'>".t("Varaa")."</a><br>";
 			}
 			else{
 				echo "<td class='day'><b>$i</b><br>";
@@ -106,7 +106,7 @@
 				$koot[$b] = count($varaukset[$b]);
 			}
 
-			echo "<table width='100%'>";
+			echo "<table class='kalenteri' width='100%'>";
 
 			for($a = 0; $a < count($VENE_ARRAY[$kukarow["aktiivinen_kalenteri"]]); $a++) {
 				echo "<tr>";

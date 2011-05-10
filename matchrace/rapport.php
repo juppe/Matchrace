@@ -47,7 +47,7 @@ if ($tee == '') {
 	echo "<h1>Aja raportti<hr></h1>";
 	echo "
 		<table><tr>
-		<form action = '$PHP_SELF?tee=Y' name='kala' method='post'>
+		<form action = '?tee=Y' name='kala' method='post'>
 		<td>SELECT:&nbsp;</td>
 		<td><input type='text' name='kentat' size='80'></td>
 		<td></tr>

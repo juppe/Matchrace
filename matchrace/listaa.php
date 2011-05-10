@@ -9,7 +9,7 @@
 				ORDER BY pinnamies";
     $result = mysql_query($query);
 
-	echo "<h2>Käyttäjät:</h2>";
+	echo "<h2>".t("Käyttäjät").":</h2>";
 
     echo "<table class='main'>";
 
@@ -17,7 +17,8 @@
 		echo "<tr><td>$row[nimi]</td><th>$row[pinnamies]</th><td>$row[puhno]</td><td>$row[eposti]</td>";
 
 		if ($kukarow["superuser"] == 'SUPER' and $kukarow["access"] < 20) {
-			echo "<td><a href='poista.php?&edi=$row[kuka]'>Poista käyttäjä</a></td><td><a href='updateacc.php?edi=$row[kuka]'>Muuta käyttäjän tietoja</a></td>";
+			echo "<td><a href='poista.php?&edi=$row[kuka]'>".t("Poista käyttäjä")."</a></td>";
+			echo "<td><a href='updateacc.php?edi=$row[kuka]'>".t("Muuta käyttäjän tietoja")."</a></td>";
 		}
 
 		echo "</tr>";

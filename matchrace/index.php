@@ -7,6 +7,11 @@ else 							$salasana	= "";
 
 require ("inc/functions.inc");
 
+if (isset($_POST['kalenteri_kieli']) and ($_POST['kalenteri_kieli'] == "se" or $_POST['kalenteri_kieli'] == "fi")) {
+	$bool = setcookie("matchrace_kieli", $_POST['kalenteri_kieli']);
+	$_COOKIE["matchrace_kieli"] = $_POST['kalenteri_kieli'];
+}
+
 if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 
 	$login="yes";
@@ -38,7 +43,7 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 			$bool = setcookie("matchrace_session", $session, time()+43200);
 
 			if ($bool === FALSE) {
-				$errormsg = t("Selaimesi ei ilmeisesti tue cookieta",$browkieli).".";
+				$errormsg = "Selaimesi ei ilmeisesti tue evästeitä.";
 			}
 			else {
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=main.php'>";
@@ -47,13 +52,16 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 		}
 	}
 	else {
-		$errormsg = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen", $browkieli)."!";
+		$errormsg = t("Käyttäjätunnusta ei löydy ja/tai salasana on virheellinen")."!";
 	}
 }
 $formi = "login"; // Kursorin ohjaus
 $kentta = "user";
 
 header("Content-Type: text/html; charset=iso-8859-1");
+
+//haetaan kieli
+$kalenteri_kieli = $_COOKIE["matchrace_kieli"];
 
 echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
 		<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"sv-se\" lang=\"sv-se\" dir=\"ltr\" >
@@ -85,7 +93,7 @@ echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://
 						<td>
 						<div id=\"topmenu_container\">
     					<ul class=\"menu\" id=\"mainmenu\">
-						<li class=\"item1\"><a href=\"{$palvelin2}\"><span>Kalenteri</span></a></li>";
+						<li class=\"item1\"><a href=\"{$palvelin2}\"><span>".t("Kalenteri")."</span></a></li>";
 
 echo "					</ul>
 						</div>
@@ -105,7 +113,7 @@ echo "					</ul>
 						<tr>
 						<td>";
 
-echo "					<h3>MatchRace / 606 / SM40 - Varauskalenterit</h3>";
+echo "					<h3>MatchRace / 606 / SM40 - ".t("Varauskalenterit")."</h3>";
 
 echo "					</td>
 						</tr>
@@ -122,21 +130,34 @@ echo "					</td>
 		    				<div id=\"main_content\">";
 
 
-echo "<h2>Sisäänkirjautuminen:</h2>";
+echo "<h2>".t("Sisäänkirjautuminen").":</h2>";
 
 echo "<form name='login' target='_top' action='index.php' method='post'>";
 echo "<table class='main'>";
 
-echo "<tr><td><font class='menu'>".t("Käyttäjätunnus",$browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
-		<tr><td><font class='menu'>".t("Salasana",$browkieli).":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
+echo "<tr><td style='width: 50%'><font class='menu'>".t("Käyttäjätunnus").":</font></td><td style='width: 50%'><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+		<tr><td style='width: 50%'><font class='menu'>".t("Salasana").":</font></td><td style='width: 50%'><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
 		</table>";
 
 if (isset($errormsg) and $errormsg != "") {
 	echo "<br><font class='error'>$errormsg</font><br>";
 }
 
-echo "<br><input type='submit' value='".t("Sisään", $browkieli)."'>";
+echo "<br><input type='submit' value='".t("Sisään")."'>";
+echo "</form><br><br>";
+
+echo "<form name='login' target='_top' action='index.php' method='post'>";
+echo "<table class='main'>";
+echo "<tr><td style='width: 50%'><font class='menu'>Välj srpåk / Valitse kieli</font></td><td style='width: 50%'>";
+echo "<select name='kalenteri_kieli' onchange='submit();'>";
+echo "<option value=''>".t("Valitse kieli")."</option>";
+echo "<option value='se'>Svenska</option>";
+echo "<option value='fi'>Suomi</option>";
+echo "</select>";
+echo "</td></tr>";
+echo "</table>";
 echo "</form>";
+
 echo "<br><br><font class='info'>Copyright &copy; 2003-".date("Y")." Johan Tötterman</font>";
 echo "<script LANGUAGE='JavaScript'>window.document.$formi.$kentta.focus();</script>";
 echo "</div></td><td valign='top' id='content_right_shadow'>&nbsp;</td></tr></table></div></body></html>";

@@ -52,18 +52,8 @@ if (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on') {
 	$palvelin2 = "https://$apunimi";
 }
 
-//haetaan browserin oletuskieli
-$browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
-
-if ($browkieli == 'sv') {
-	$browkieli = 'se';
-}
-elseif (isset($kieli) and $kieli == 'fi') {
-	$browkieli = 'fi';
-}
-else {
-	$browkieli = 'en';
-}
+//haetaan kieli
+$kalenteri_kieli = $_COOKIE["matchrace_kieli"];
 
 // Initioidaan pari muuttujaa
 if (!isset($login)) $login = "";
@@ -142,6 +132,8 @@ if ($session != '') {
 		$nextmmonth = date("n",mktime(0, 0, 0, $month+1, $day,  $year));
 		$nextymonth = date("Y",mktime(0, 0, 0, $month+1, $day,  $year));
 		$nextdmonth = date("j",mktime(0, 0, 0, $month+1, $day,  $year));
+		
+		require("functions.inc");
 
 		echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
 				<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"sv-se\" lang=\"sv-se\" dir=\"ltr\" >
@@ -170,23 +162,23 @@ if ($session != '') {
 		 						<td>
 		 						<div id=\"topnav_corner_left\">&nbsp;</div>
 		 						</td>
-								<td>
+								<td nowrap>
 								<div id=\"topmenu_container\">
 		    					<ul class=\"menu\" id=\"mainmenu\">
-								<li class=\"item1\"><a href=\"{$palvelin2}main.php\"><span>Kalenteri</span></a></li>";
+								<li class=\"item1\"><a href=\"{$palvelin2}main.php\"><span>".t("Kalenteri")."</span></a></li>";
 
 		if ($kukarow["superuser"] == 'SUPER' and $kukarow["access"] < 20) {
-			echo "<li class=\"item2\"><a href='register.php?paivam=$year-$month-1'><span>Uusi käyttäjä</span></a></li>";
+			echo "<li class=\"item2\"><a href='register.php?paivam=$year-$month-1'><span>".t("Uusi käyttäjä")."</span></a></li>";
 		}
 
 		if ($kukarow["access"] < 20) {
-			echo "	<li class=\"item3\"><a href='updateacc.php?paivam=$year-$month-1'><span>Päivitä tietosi</span></a></li>
-				   	<li class=\"item4\"><a href='listaa.php?paivam=$year-$month-1'><span>Listaa purjehtijat</span></a></li>
-			   		<li class=\"item5\"><a href='scrap.php?paivam=$year-$month-1'><span>Keskustele</span></a></li>
-					<li class=\"item6\"><a href='listaavaraukset.php?paivam=$year-$month-1'><span>Omat varaukset</span></a></li>";
+			echo "	<li class=\"item3\"><a href='updateacc.php?paivam=$year-$month-1'><span>".t("Päivitä tietosi")."</span></a></li>
+				   	<li class=\"item4\"><a href='listaa.php?paivam=$year-$month-1'><span>".t("Listaa purjehtijat")."</span></a></li>
+			   		<li class=\"item5\"><a href='scrap.php?paivam=$year-$month-1'><span>".t("Keskustele")."</span></a></li>
+					<li class=\"item6\"><a href='listaavaraukset.php?paivam=$year-$month-1'><span>".t("Omat varaukset")."</span></a></li>";
 		}
 
-		echo "<li class=\"item11\"><a href='logout.php'><span>Kirjaudu ulos</span></a></li>";
+		echo "<li class=\"item11\"><a href='logout.php'><span>".t("Kirjaudu ulos")."</span></a></li>";
 
 		echo "						</ul>
 								</div>
@@ -207,9 +199,9 @@ if ($session != '') {
 								<td>";
 
 
-		echo "<h3>MatchRace / 606 / SM40 - Varauskalenterit</h3>";
+		echo "<h3>MatchRace / 606 / SM40 - ".t("Varauskalenterit")."</h3>";
 
-		echo "<form method='post'><h3>Valitse kalenteri:
+		echo "<form method='post'><h3>".t("Valitse kalenteri").":
 				<select name='kalenteri_select' onchange='submit();'>";
 
 		foreach ($KALENTERIT_ARRAY as $kindex => $knimi) {
@@ -240,7 +232,6 @@ if ($session != '') {
 				
 		if (isset($paivam)) $xpvm = explode("-",$paivam);
 		
-		require("functions.inc");
 	}
 
 	/*

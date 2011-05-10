@@ -3,17 +3,17 @@
 	// Parametrit
 	require('inc/parametrit.inc');
 
-	echo "<h2>Omat varaukset:</h2>";
+	echo "<h2>".t("Omat varaukset").":</h2>";
 
 	echo "<table class='main'>";
-	echo "<tr><th colspan='5'>Tulevat varaukset:</th>";
+	echo "<tr><th colspan='6'>".t("Tulevat varaukset").":</th>";
 	echo "</tr>";
-    echo "<tr><td>P‰iv‰m‰‰r‰: </td>";
-	echo "<td>Laji: </td>";	
-	echo "<td>Vene: </td>";
-	echo "<td>Aika: </td>";
-	echo "<td>Kommentit: </td>";
-	echo "<td>Treenin aihe:</td>";
+    echo "<tr><td>".t("P‰iv‰m‰‰r‰")."</td>";
+	echo "<td>".t("Laji")."</td>";
+	echo "<td>".t("Vene")."</td>";
+	echo "<td>".t("Aika")."</td>";
+	echo "<td>".t("Kommentit")."</td>";
+	echo "<td>".t("Treenin aihe")."</td>";
 	echo "</tr>";
 
 	$query = "	SELECT *
@@ -36,14 +36,14 @@
 	echo "</table><br><br>";
 
 	echo "<table class='main'>";
-	echo "<tr><th colspan='5'>Vanhemmat varaukset:</th>";
+	echo "<tr><th colspan='6'>".t("Vanhemmat varaukset").":</th>";
 	echo "</tr>";
-    echo "<tr><td>P‰iv‰m‰‰r‰: </td>";
-	echo "<td>Laji: </td>";	
-	echo "<td>Vene: </td>";
-	echo "<td>Aika: </td>";
-	echo "<td>Kommentit: </td>";
-	echo "<td>Treenin aihe:</td>";
+    echo "<tr><td>".t("P‰iv‰m‰‰r‰").":</td>";
+	echo "<td>".t("Laji").":</td>";
+	echo "<td>".t("Vene").":</td>";
+	echo "<td>".t("Aika").":</td>";
+	echo "<td>".t("Kommentit").":</td>";
+	echo "<td>".t("Treenin aihe").":</td>";
 	echo "</tr>";
 
 	$query = "	SELECT *

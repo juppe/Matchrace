@@ -17,24 +17,24 @@
 
 		if (strlen(trim($passwd1)) > 0) {
 			if ($passwd1 != $passwd2) {
-				$virhe .= "VIRHE: Salasanat eivät täsmää!<br>";
+				$virhe .= t("VIRHE: Salasanat eivät täsmää")."!<br>";
 				$tee = "";
 			}
 
 			if (strlen($passwd1) < 5) {
-	    	    $virhe .= "VIRHE: Salasana on liian lyhyt! Minimipituus on 5 merkkiä.<br>";
+	    	    $virhe .= t("VIRHE: Salasana on liian lyhyt! Minimipituus on 5 merkkiä").".<br>";
 				$tee = "";
 			}
 		}
 
 		if ($firname == '') {
-			$virhe .= "VIRHE: Nimi puuttuu!<br>";
+			$virhe .= t("VIRHE: Nimi puuttuu")."!<br>";
 			$tee = "";
 		}
 
 		if ($kukarow["superuser"] == 'SUPER') {
 			if ($pinnamies == "") {
-				$virhe .= "VIRHE: Alias puuttuu!<br>";
+				$virhe .= t("VIRHE: Alias puuttuu")."!<br>";
 				$tee = "";
 			}
 			else {
@@ -45,14 +45,14 @@
 		       	$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				if (mysql_num_rows($result) > 0) {
-					$virhe .= "VIRHE: Alias '$pinnamies' on jo käytössä!<br>";
+					$virhe .= t("VIRHE: Alias '%s' on jo käytössä", "", $pinnamies)."!<br>";
 					$tee = "";
 				}
 			}
 		}
 
 		if (!isset($kalenterit) or count($kalenterit) == 0) {
-			$virhe .= "VIRHE: Valitse kalenterit käyttäjälle!<br>";
+			$virhe .= t("VIRHE: Valitse kalenterit käyttäjälle")."!<br>";
 			$tee = "";
 		}
 		else {
@@ -80,7 +80,7 @@
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 			}
 
-			echo "<br><br><br>Käyttäjätietosi päivitettiin onnistuneesti!";
+			echo "<br><br><br>".t("Käyttäjätietosi päivitettiin onnistuneesti")."!";
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=main.php'>";
 		}
 		else {
@@ -113,21 +113,21 @@
 				$kalenterit[$kalet[$k]] = $kalet[$k];
 			}
 		}
-		
+
 		if (!isset($firname)) 		$firname = $row["nimi"];
 		if (!isset($pinnamies)) 	$pinnamies = $row["pinnamies"];
 		if (!isset($phonenum)) 		$phonenum = $row["puhno"];
 		if (!isset($email)) 		$email = $row["eposti"];
 
-		echo "<h2>Päivitä käyttäjätiedot:</h2>";
+		echo "<h2>".t("Päivitä käyttäjätiedot").":</h2>";
 
 		echo "<form method='post'>";
 		echo "<input type='hidden' name='tee' value='PAIVITA_KAYTTAJA'>";
 
 		echo "<table class='main'>";
-		echo "<tr><th>Käyttäjätunnus:</th><td>$muutakuka</td></tr>";
-		echo "<tr><th>Nimi:</th><td><input type='text' size='35' value='$firname' maxlenght='25' name='firname'></td></tr>";
-		echo "<tr><th align='left'>Kalenterit:</th><td>";
+		echo "<tr><th>".t("Käyttäjätunnus")."</th><td>$muutakuka</td></tr>";
+		echo "<tr><th>".t("Nimi")."</th><td><input type='text' size='35' value='$firname' maxlenght='25' name='firname'></td></tr>";
+		echo "<tr><th>".t("Kalenterit")."</th><td>";
 
 		if ($kukarow["superuser"] == 'SUPER') {
 			foreach ($KALENTERIT_ARRAY as $kindex => $knimi) {
@@ -148,21 +148,21 @@
 		echo "</td></tr>";
 
 		if ($kukarow["superuser"] == 'SUPER') {
-			echo "<tr><th>Alias:</th><td height='25'><input type='text' size='35' value='$pinnamies' maxlenght='3' name='pinnamies'></td></tr>";
+			echo "<tr><th>".t("Alias")."</th><td height='25'><input type='text' size='35' value='$pinnamies' maxlenght='3' name='pinnamies'></td></tr>";
 		}
 		else {
-			echo "<tr><th>Alias:</th><td height='25'>$row[pinnamies]</td></tr>";
+			echo "<tr><th>".t("Alias")."</th><td height='25'>$row[pinnamies]</td></tr>";
 		}
 
-		echo "<tr><th>Puhelin:</th><td><input type='text' size='35' value='$phonenum' maxlenght='25' name='phonenum'></td></tr>";
-		echo "<tr><th>Sähköposti:</th><td><input type='text' size='35' value='$email' maxlenght='25' name='email'></td></tr>";
+		echo "<tr><th>".t("Puhelin")."</th><td><input type='text' size='35' value='$phonenum' maxlenght='25' name='phonenum'></td></tr>";
+		echo "<tr><th>".t("Sähköposti")."</th><td><input type='text' size='35' value='$email' maxlenght='25' name='email'></td></tr>";
 
-		echo "<tr><td colspan='2'><br>Jos haluat vaihtaa salasanasi, syötä uusi salasana kahteen kertaan:</td></tr>";
-		echo "<tr><th>Uusi salasana:</th><td><input type='password' name='passwd1' size='15' maxlength='30'></td></tr>";
-		echo "<tr><th>Uusi salasana:</th><td><input type='password' name='passwd2' size='15' maxlength='30'></td></tr>";
+		echo "<tr><td colspan='2'><br>".t("Jos haluat vaihtaa salasanasi, syötä uusi salasana kahteen kertaan").":</td></tr>";
+		echo "<tr><th>".t("Uusi salasana")."</th><td><input type='password' name='passwd1' size='15' maxlength='30'></td></tr>";
+		echo "<tr><th>".t("Uusi salasana")."</th><td><input type='password' name='passwd2' size='15' maxlength='30'></td></tr>";
 
 		echo "</table>";
-		echo "<br><input type='submit' value='Päivitä tiedot'>";
+		echo "<br><input type='submit' value='".t("Päivitä tiedot")."'>";
 		echo "</form>";
 
 	}

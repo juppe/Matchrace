@@ -24,7 +24,7 @@
 	$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 	if (mysql_num_rows($result) >= $max_varaukset_per_viikko[$kukarow["aktiivinen_kalenteri"]] and $kukarow["superuser"] != 'SUPER') {
-		echo "<font class='error'>Sinulla voi olla korkeintaan {$max_varaukset_per_viikko[$kukarow["aktiivinen_kalenteri"]]} varausta per viikko!</font><br>";
+		echo "<font class='error'>".t("Sinulla voi olla korkeintaan %s varausta per viikko", "", $max_varaukset_per_viikko[$kukarow["aktiivinen_kalenteri"]])."!</font><br>";
 		$tee = 'OHITA';
 	}
 
@@ -37,19 +37,19 @@
 	$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 	if (mysql_num_rows($result) >= $max_tulevat_varaukset[$kukarow["aktiivinen_kalenteri"]] and $kukarow["superuser"] != 'SUPER') {
-		echo "<font class='error'>Sinulla voi olla korkeintaan {$max_tulevat_varaukset[$kukarow["aktiivinen_kalenteri"]]} tulevaa varausta!</font><br>";
+		echo "<font class='error'>".t("Sinulla voi olla korkeintaan %s tulevaa varausta", "", $max_tulevat_varaukset[$kukarow["aktiivinen_kalenteri"]])."!</font><br>";
 		$tee = 'OHITA';
 	}
 
 	//Kuinka pitk‰lle tulavaisuuteen voi varata
 	if ($tpk > $tpm and $kukarow["superuser"] != 'SUPER')  {
-		echo "<font class='error'>N‰in pitk‰lle tulevaisuuteen ei voi viel‰ varata!</font><br>";
+		echo "<font class='error'>".t("N‰in pitk‰lle tulevaisuuteen ei voi viel‰ varata. Varauksia voi tehd‰ korkeintaan %s p‰iv‰‰ tulevaisuuteen.", "", $max_aika_tulevaisuuteen[$kukarow["aktiivinen_kalenteri"]])."!</font><br>";
 		$tee = 'OHITA';
 	}
 
 	//Menneisyyteen ei voi varata
 	if ($tpk < $tpa)  {
-		echo "<font class='error'>Menneisyyteen ei voi tehd‰ varauksia!</font><br>";
+		echo "<font class='error'>".t("Menneisyyteen ei voi tehd‰ varauksia")."!</font><br>";
 		$tee = 'OHITA';
 	}
 
@@ -61,10 +61,10 @@
 		echo "<input type='hidden' name='toiminto' 	value='$toiminto'>";
     	echo "<input type='hidden' name='varausid' 	value='$varausid'>";
     	echo "<input type='hidden' name='pass' 		value='$pass'>";
-		echo "	<tr><th align='left'>Varataan k‰ytt‰j‰lle:</th><td>$kukarow[nimi]</td></tr>
-				<tr><th align='left'>P‰iv‰m‰‰r‰:</th><td>".tv1dateconv($paivam)."</td></tr>
-				<tr><th align='left'>Alias:</th><td>$kukarow[pinnamies]</td></tr>
-				<tr><th align='left'>Valittu aika:</th><td>{$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$pass]}</td></tr>";
+		echo "	<tr><th align='left'>".t("Varataan k‰ytt‰j‰lle").":</th><td>$kukarow[nimi]</td></tr>
+				<tr><th align='left'>".t("P‰iv‰m‰‰r‰").":</th><td>".tv1dateconv($paivam)."</td></tr>
+				<tr><th align='left'>".t("Alias").":</th><td>$kukarow[pinnamies]</td></tr>
+				<tr><th align='left'>".t("Valittu aika").":</th><td>{$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$pass]}</td></tr>";
 
 		$query = "	SELECT count(*) kpl, max(vene)+1 vene
                     FROM varaukset
@@ -77,7 +77,7 @@
 		$crow = mysql_fetch_array($result);
 
 		if ($crow["kpl"] >= count($VENE_ARRAY[$kukarow["aktiivinen_kalenteri"]])) {
-			echo "<tr><th align='left'>HUOM:</th><td><font class='error'>Kaikki veneet ovat varattuja!!!<br>Tarjolla on jononumero: ".(($crow["kpl"] - count($VENE_ARRAY[$kukarow["aktiivinen_kalenteri"]]))+1)."</font></td></tr>";
+			echo "<tr><th align='left'>".t("HUOM").":</th><td><font class='error'>".t("Kaikki veneet ovat varattuja")."!!!<br>".t("Tarjolla on jononumero").": ".(($crow["kpl"] - count($VENE_ARRAY[$kukarow["aktiivinen_kalenteri"]]))+1)."</font></td></tr>";
 		}
 
 		echo "<input type='hidden' name='vene' 	value='$crow[vene]'>";
@@ -89,13 +89,13 @@
 		$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 		$rrow = mysql_fetch_row($result);
 
-		echo "<tr><th align='left'>Julkinen kommentti: </th>
+		echo "<tr><th align='left'>".t("Julkinen kommentti").": </th>
 				<td width='300'><textarea name='kommentit' rows='2' cols='30' wrap='hard'>$rrow[kommentit]</textarea></td></tr>";
 
-		echo "<tr><th align='left'>Treenin aihe: (Ei julkinen) </th>
+		echo "<tr><th align='left'>".t("Treenin aihe").": (".t("Ei julkinen").") </th>
 				<td width='300'><textarea name='kommentit2' rows='2' cols='30' wrap='hard'>$rrow[kommentit2]</textarea></td></tr>";
 
-		echo "<tr><th></th><td><input type='submit' value='Varaa'></td></tr></form>";
+		echo "<tr><th></th><td><input type='submit' value='".t("Varaa")."'></td></tr></form>";
 		echo "</form></table>";
 	}
 
@@ -122,7 +122,7 @@
 						kalenteri 	= '{$kukarow["aktiivinen_kalenteri"]}'";
 	        $result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-			echo "Lis‰t‰‰n varaus p‰iv‰lle: ".tv1dateconv($paivam)." Ajalle: {$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$pass]}<br>";
+			echo t("Lis‰t‰‰n varaus p‰iv‰lle").": ".tv1dateconv($paivam)." ".t("Ajalle").": {$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$pass]}<br>";
 
 			if ($toiminto == 'editoi' and $varausid != '') {
 
@@ -187,7 +187,7 @@
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=main.php?day=1&month=$xpvm[1]&year=$xpvm[0]'>";
 		}
 		else {
-			echo "<font class='error'>VIRHE: T‰m‰ varaus on jo tallennettu: ".tv1dateconv($paivam)." Ajalle: ".$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$pass]."</font><br>";
+			echo "<font class='error'>".t("VIRHE: T‰m‰ varaus on jo tallennettu").": ".tv1dateconv($paivam)." ".t("Ajalle").": ".$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$pass]."</font><br>";
 		}
 	}
 
@@ -216,10 +216,10 @@
 									kalenteri	= '{$kukarow["aktiivinen_kalenteri"]}'";
 				        $result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-						echo "Lis‰t‰‰n varaus p‰iv‰lle: ".tv1dateconv($paivam)." Ajalle: ".$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$aika[$b]]."<br>";
+						echo t("Lis‰t‰‰n varaus p‰iv‰lle").": ".tv1dateconv($paivam)." ".t("Ajalle").": ".$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$aika[$b]]."<br>";
 					}
 					else {
-						echo "<font class='error'>VIRHE: T‰m‰ varaus on jo tallennettu: ".tv1dateconv($paivam)." Ajalle: ".$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$aika[$b]]."</font><br>";
+						echo "<font class='error'>".t("VIRHE: T‰m‰ varaus on jo tallennettu").": ".tv1dateconv($paivam)." ".t("Ajalle").": ".$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$aika[$b]]."</font><br>";
 					}
 				}
 			}
@@ -247,7 +247,7 @@
 		}
 
 		if ($row["tunnus"] != $kukarow["tunnus"] and $kukarow["superuser"] != 'SUPER') {
-			echo "<font class='error'>Et voi muuttaa muiden k‰ytt‰jien varauksia!</font><br>";
+			echo "<font class='error'>".t("Et voi muuttaa muiden k‰ytt‰jien varauksia")."!</font><br>";
 			exit;
 		}
 
@@ -257,7 +257,7 @@
 		echo "<input type='hidden' name='paivam' 	value='$paivam'>";
 		echo "<input type='hidden' name='toiminto' 	value='$toiminto'>";
 		echo "<input type='hidden' name='varausid' 	value='$varausid'>";
-		echo "<tr><th align='left'>Varataan k‰ytt‰j‰lle:</th><td>$row[nimi]</td></tr>";
+		echo "<tr><th align='left'>".t("Varataan k‰ytt‰j‰lle").":</th><td>$row[nimi]</td></tr>";
 
 		if ($toiminto == 'editoi') {
 			$query = "	SELECT paivam, pass
@@ -267,7 +267,7 @@
            	$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
            	$trow = mysql_fetch_array($result);
 
-			echo "<th align='left'>P‰iv‰m‰‰r‰:</th><td><select name='paivam'>";
+			echo "<th align='left'>".t("P‰iv‰m‰‰r‰").":</th><td><select name='paivam'>";
 
 			for($i = -15; $i <= 15; $i++) {
 
@@ -280,24 +280,22 @@
 
 				if ($dd1 == -1) $dd1 =6;
 
-				$paivam2 = $DAY_ARRAY[$kukarow["aktiivinen_kalenteri"]][$dd1]." ".tv1dateconv($valpvm);
-
 				if ($valpvm == $trow["paivam"]) {
                 	$sel = "SELECTED";
 				}
 				else{
 					$sel = "";
 				}
-				echo "<option value='$valpvm' $sel>$paivam2</option>";
+				echo "<option value='$valpvm' $sel>".t($DAY_ARRAY[$kukarow["aktiivinen_kalenteri"]][$dd1])." ".tv1dateconv($valpvm)."</option>";
 			}
 			echo "</select></td>";
 		}
 		else{
-			echo "<tr><th align='left'>P‰iv‰m‰‰r‰:</th><td>".tv1dateconv($paivam)."</td></tr>";
+			echo "<tr><th align='left'>".t("P‰iv‰m‰‰r‰").":</th><td>".tv1dateconv($paivam)."</td></tr>";
 		}
 
-		echo "<tr><th align='left'>Alias: </th><td width='300'>$row[0]</td></tr>";
-		echo "<tr><th align='left'>Valitse aika:</th><td><select name='pass'>";
+		echo "<tr><th align='left'>".t("Alias").": </th><td width='300'>$row[0]</td></tr>";
+		echo "<tr><th align='left'>".t("Valitse aika").":</th><td><select name='pass'>";
 
 		foreach($AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]] as $a => $aika) {
 			if ($a == $trow["pass"]) {
@@ -312,7 +310,7 @@
 
 		echo "</select>";
 		echo "</td></tr>";
-		echo "<tr><th>&nbsp;</th><td><input type='submit' value='Jatka'></td></tr>";
+		echo "<tr><th>&nbsp;</th><td><input type='submit' value='".t("Jatka")."'></td></tr>";
 		echo "</form></table>";
 
 		if ($kukarow["superuser"] == 'SUPER' and $toiminto != 'editoi') {
@@ -322,8 +320,8 @@
         	        <input type='hidden' name='paivam' value='$paivam'>";
 
         	echo "<br><br><table class='main'>";
-			echo "<tr><th colspan='3'>Admin: (varaa monta venett‰ kerralla)</th></tr>";
-			echo "<tr><td>Varataan k‰ytt‰j‰lle: </td><td>Valitse veneet: </td><td> Valitse ajat: </td></tr>";
+			echo "<tr><th colspan='3'>Admin: (".t("varaa monta venett‰ kerralla").")</th></tr>";
+			echo "<tr><td>".t("Varataan k‰ytt‰j‰lle")."</td><td>".t("Valitse veneet")."</td><td>".t("Valitse ajat")."</td></tr>";
             echo "<tr><td valign='top'><select name='pmies'>";
 
             $query = "	SELECT pinnamies, tunnus, nimi, superuser
@@ -331,7 +329,7 @@
 						WHERE kuka.kalenterit = '{$kukarow["aktiivinen_kalenteri"]}'
 						or kuka.kalenterit like '{$kukarow["aktiivinen_kalenteri"]},%'
 						or kuka.kalenterit like '%,{$kukarow["aktiivinen_kalenteri"]},%'
-						or kuka.kalenterit like '%,{$kukarow["aktiivinen_kalenteri"]}'												
+						or kuka.kalenterit like '%,{$kukarow["aktiivinen_kalenteri"]}'
 						ORDER BY pinnamies";
            	$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
@@ -348,7 +346,7 @@
 				echo "{$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$s]} <input type='checkbox' name='aika[]' value='$s'><br>";
 			}
 			echo "</td></tr>";
-			echo "<tr><th colspan='3'><input type='submit' value='Varaa'></th></tr>";
+			echo "<tr><th colspan='3'><input type='submit' value='".t("Varaa")."'></th></tr>";
         	echo "</form></table>";
         }
 	}

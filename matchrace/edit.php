@@ -22,45 +22,49 @@
 	$srow = mysql_fetch_array($result);
 
 	if ($tee == '') {
+
+		echo "<h2>".t("Varauksen tiedot").":</h2>";
+
        	echo "<table class='main'>";
-		echo "<tr><th  align='left'colspan='2'>Varauksen tiedot</th></tr>";
-		echo "<tr><th align='left'>Varaus: </th><td>$srow[nimi] ($srow[kukapinna])</td></tr>
-		      <tr><th align='left'>P‰iv‰m‰‰r‰: </th><td>".tv1dateconv($srow["paivam"])."</td></tr>
-		      <tr><th align='left'>Aika: </th><td>".$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$srow["pass"]]."</td></tr>
-		      <tr><th align='left'>Kommentit: </th><td> $srow[kommentit] &nbsp;</td></tr>";
+		echo "<tr><th align='left'>".t("Varaus")."</th><td>$srow[nimi] ($srow[kukapinna])</td></tr>
+		      <tr><th align='left'>".t("P‰iv‰m‰‰r‰")."</th><td>".tv1dateconv($srow["paivam"])."</td></tr>
+		      <tr><th align='left'>".t("Aika")."</th><td>".$AIKA_ARRAY[$kukarow["aktiivinen_kalenteri"]][$srow["pass"]]."</td></tr>
+		      <tr><th align='left'>".t("Kommentit")."</th><td> $srow[kommentit] &nbsp;</td></tr>";
 
 		if ($kukarow["tunnus"] == $srow["pinnamies"] and ($srow["tpk"] > $tpa or ($srow["tpk"] == $tpa and $hma <= $max_perumisaika[$kukarow["aktiivinen_kalenteri"]])) and $kukarow["access"] < 20) {
 			echo "<form method='post' >";
 			echo "<input type='hidden' name='tee' 		value='editoi'>";
 			echo "<input type='hidden' name='paivam' 	value='$paivam'>";
 			echo "<input type='hidden' name='varausid' 	value='$varausid'>";
-			echo "<tr><th></th><td><input type='submit' name='kumpi' value='Poista'>&nbsp;&nbsp;<input type='submit' name='kumpi' value='Muuta'></td></tr>";
+			echo "<tr><th></th><td>
+				<input type='submit' name='Poista' value='".t("Poista")."'>&nbsp;&nbsp;
+				<input type='submit' name='Muuta' value='".t("Muuta")."'></td></tr>";
 			echo "</form>";
 		}
 		elseif ($srow["tpk"] < $tpa or ($srow["tpk"] == $tpa and $hma > $max_perumisaika[$kukarow["aktiivinen_kalenteri"]])) {
-			echo "<tr><th align='left'>Huom:</th><td><font class='error'>Varaus lukittu: ".tv1dateconv($srow["tpk_echo"])." kello: {$max_perumisaika[$kukarow["aktiivinen_kalenteri"]]}</font></td></tr>";
+			echo "<tr><th align='left'>".t("Huom")."</th><td><font class='error'>".t("Varaus lukittu").": ".tv1dateconv($srow["tpk_echo"])." ".t("kello").": {$max_perumisaika[$kukarow["aktiivinen_kalenteri"]]}</font></td></tr>";
 		}
 
 		echo "</table>";
 
 		if ($kukarow["superuser"] == 'SUPER' and $kukarow["access"] < 20) {
 			#and ($srow["tpk"] > $tpa or ($srow["tpk"] == $tpa and $hma <= $max_perumisaika[$kukarow["aktiivinen_kalenteri"]]))
-			
+
 			echo "<br><br><table class='main'>";
 			echo "<form method='post' >";
 			echo "<input type='hidden' name='paivam' 	value='$paivam'>";
             echo "<input type='hidden' name='tee' value='editoi'>";
             echo "<input type='hidden' name='varausid' value='$varausid'>";
             echo "<tr><th align='left' colspan='2'>Admin:</th></tr>";
-			echo "<tr><td>Poista t‰m‰ varaus:</td><td><input type='submit' name='kumpi' value='Poista'></td></tr>
-				  <tr><td>Muuta t‰t‰ varausta:</td><td><input type='submit' name='kumpi' value='Muuta'></td></tr>
-				  <tr><td>Poista kaikki p‰iv‰n varaukset:</td><td><input type='submit' name='kumpi' value='Tyhjenn‰ p‰iv‰'></td></tr>";
+			echo "<tr><td>".t("Poista t‰m‰ varaus")."</td><td><input type='submit' name='Poista' value='".t("Poista")."'></td></tr>
+				  <tr><td>".t("Muuta t‰t‰ varausta")."</td><td><input type='submit' name='Muuta' value='".t("Muuta")."'></td></tr>
+				  <tr><td>".t("Poista kaikki p‰iv‰n varaukset")."</td><td><input type='submit' name='Tyhjennapaiva' value='".t("Tyhjenn‰ p‰iv‰")."'></td></tr>";
           	echo "</table></form>";
 		}
 	}
 
 	if ($tee == 'editoi') {
-		if ($kumpi == 'Poista') {
+		if (isset($Poista)) {
 			if ($srow["tpk"] >= $tpa) {
 
 				$query = "	DELETE
@@ -69,7 +73,7 @@
 							AND kalenteri = '{$kukarow["aktiivinen_kalenteri"]}'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-				echo "<br>Varaus on poistettu!<br>";
+				echo "<br>".t("Varaus poistettu")."!<br>";
 
 				// Katsotaan nostammeko jonkun varapaikalta varsinaiselle paikalle
 				$query = "	SELECT varaukset.vene, kuka.nimi, kuka.eposti, kuka.puhno
@@ -116,11 +120,11 @@
 				exit;
 			}
 			else{
-				echo "<br><br>Vanhoja varauksia ei voi poistaa!<br><br>";
+				echo "<br><br>".t("Vanhoja varauksia ei voi poistaa")."!<br><br>";
 			}
 		}
-		
-		if ($kumpi == 'Tyhjenn‰ p‰iv‰' and $kukarow["superuser"] == 'SUPER' and $kukarow["access"] < 20) {
+
+		if (isset($Tyhjennapaiva) and $kukarow["superuser"] == 'SUPER' and $kukarow["access"] < 20) {
 			if ($srow["tpk"] >= $tpa) {
 				$query = "	DELETE
 				       		FROM varaukset
@@ -128,15 +132,16 @@
 							AND kalenteri = '{$kukarow["aktiivinen_kalenteri"]}'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
-				echo "<br><br>P‰iv‰ ".tv1dateconv($paivam)." on tyhjennetty!<br>";
+				echo "<br><br>".t("P‰iv‰ %s on tyhjennetty", "", tv1dateconv($paivam))."!<br>";
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=main.php?day=1&month=$xpvm[1]&year=$xpvm[0]'>";
 				exit;
 			}
 			else{
-				echo "<br><br>Vanhoja varauksia ei voi poistaa!<br><br>";
+				echo "<br><br>".t("Vanhoja varauksia ei voi poistaa")."!<br><br>";
 			}
 		}
-		if ($kumpi == 'Muuta') {
+		
+		if (isset($Muuta)) {
             if ($srow["tpk"] >= $tpa) {
 				if ($kukarow["superuser"] == 'SUPER' and $kukarow["access"] < 20) {
 					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tapahtuma.php?paivam=$paivam&a=aa&toiminto=editoi&varausid=$varausid'>";
@@ -148,7 +153,7 @@
 				}
 			}
 			else{
-        		echo "<br><br>Vanhoja varauksia ei voi muuttaa!<br><br>";
+        		echo "<br><br>".t("Vanhoja varauksia ei voi muuttaa")."!<br><br>";
             }
         }
 	}
