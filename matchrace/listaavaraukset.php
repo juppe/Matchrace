@@ -66,5 +66,10 @@
 
 	echo "</table><br><br>";
 
+
+	if ($kukarow["superuser"] == 'SUPER' and $kukarow["access"] < 20) {
+		echo "<br><br><a href='tilastot.php'><h2>".t("Varaustilastot")."</h2></a></td>";
+	}
+
 	require('inc/footer.inc');
 ?>
