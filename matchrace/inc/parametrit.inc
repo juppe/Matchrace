@@ -91,14 +91,14 @@ if ($session != '') {
 	for ($k = 0; $k < count($kalet); $k++) {
 		$KUKA_KALENTERIT[$kalet[$k]] = $kalet[$k];
 	}
-	
+
 	if (isset($kalenteri_select)) {
 		if (isset($KUKA_KALENTERIT[$kalenteri_select])) {
 			$query = "	UPDATE kuka
 						SET aktiivinen_kalenteri = '$kalenteri_select'
 						WHERE kuka = '{$kukarow["kuka"]}'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");	
-			
+			$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
+
 			$kukarow["aktiivinen_kalenteri"] = $kalenteri_select;
 		}
 	}
@@ -106,10 +106,29 @@ if ($session != '') {
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
 
-	if ($phpnimi != 'index.php') {
+	if (isset($lataa_tiedosto) and $lataa_tiedosto == 1) {
+		// Kerrotaan selaimelle, että tämä on tiedosto
+		if (ini_get('zlib.output_compression')) {
+			ini_set('zlib.output_compression', 'Off');
+		}
+
+		header("Pragma: public");
+		header("Expires: 0");
+		header("HTTP/1.1 200 OK");
+		header("Status: 200 OK");
+		header("Accept-Ranges: bytes");
+		header("Content-Description: File Transfer");
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header("Cache-Control: private", false);
+		header("Content-Transfer-Encoding: binary");
+		header("Content-Type: application/force-download");
+		header('Content-Disposition: attachment; filename='.basename($kaunisnimi));	
+		header("Content-Length: ".filesize("/tmp/".basename($tmpfilenimi)));
+	}
+	elseif ($phpnimi != 'index.php') {
 
 		header("Content-Type: text/html; charset=iso-8859-1");
-		
+
 		// otetaan oletukseksi tämä kuukausi ja tämä vuosi
 		if ($month == '') 	$month = date("n");
 		if ($year == '')  	$year  = date("Y");
@@ -132,7 +151,7 @@ if ($session != '') {
 		$nextmmonth = date("n",mktime(0, 0, 0, $month+1, $day,  $year));
 		$nextymonth = date("Y",mktime(0, 0, 0, $month+1, $day,  $year));
 		$nextdmonth = date("j",mktime(0, 0, 0, $month+1, $day,  $year));
-		
+
 		require("functions.inc");
 
 		echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
@@ -229,9 +248,9 @@ if ($session != '') {
 				  				<td valign=\"top\" id=\"content_left_shadow\">&nbsp;</td>
 				  				<td align=\"center\" valign=\"top\" id=\"content_td\">
 				    				<div id=\"main_content\">";
-				
+
 		if (isset($paivam)) $xpvm = explode("-",$paivam);
-		
+
 	}
 
 	/*
